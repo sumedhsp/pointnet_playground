@@ -135,15 +135,18 @@ from collections import defaultdict
 
 class_correct = defaultdict(int)
 class_total = defaultdict(int)
+class_predicted = defaultdict(int)
+
+classifier = classifier.eval()
 
 total_correct = 0
 total_testset = 0
-for i,data in tqdm(enumerate(testdataloader, 0)):
+
+for i, data in enumerate(testdataloader, 0):
     points, target = data
     target = target[:, 0]
     points = points.transpose(2, 1)
-    points, target = points.cuda(), target.cuda()
-    classifier = classifier.eval()
+    points, target = points.cuda(), target.cuda()    
     pred, _, _ = classifier(points)
     pred_choice = pred.data.max(1)[1]
     correct = pred_choice.eq(target.data).cpu().sum()
@@ -154,13 +157,32 @@ for i,data in tqdm(enumerate(testdataloader, 0)):
         if t == p:
             class_correct[t.item()] += 1
         class_total[t.item()] += 1
+        class_predicted[p.item()] += 1
 
 print("Overall Accuracy {}".format(total_correct / float(total_testset)))
-
 
 # Displaying per-class accuracy
 for cls in class_total.keys():
     class_accuracy = class_correct[cls] / class_total[cls]
     print(f"Class {cls} Accuracy: {class_accuracy: .2f}")
+
+# Precision, Recall, and F1-score for class 7
+cls = 7
+if cls in class_total and cls in class_predicted:
+    tp = class_correct[cls]  # True Positives
+    fn = class_total[cls] - tp  # False Negatives
+    fp = class_predicted[cls] - tp  # False Positives
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+
+    print(f"\nClass {cls} Metrics:")
+    print(f"Precision: {precision:.2f}")
+    print(f"Recall: {recall:.2f}")
+    print(f"F1-score: {f1_score:.2f}")
+else:
+    print(f"\nClass {cls} not found in dataset.")
+
 
 
