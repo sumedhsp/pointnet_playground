@@ -6,10 +6,15 @@ import torch
 import torch.nn.parallel
 import torch.optim as optim
 import torch.utils.data
+import torch.nn.functional as F
+import sys
+
+# Adding the parent directory to sys.path to call pointnet classes.
+project_root = os.path.abspath(os.path.join(os.getcwd(), '..'))
+sys.path.append(project_root)
+
 from pointnet.dataset import ShapeNetDataset, ModelNetDataset
 from pointnet.model import PointNetCls, feature_transform_regularizer
-import torch.nn.functional as F
-from tqdm import tqdm
 
 
 parser = argparse.ArgumentParser()
