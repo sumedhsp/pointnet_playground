@@ -1,0 +1,7 @@
+airplane        0
+bathtub 1
+bench   2
+car     3
+chair   4
+cone    5
+cup     6
